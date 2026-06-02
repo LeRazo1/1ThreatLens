@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ThreatLens — Cyber Threat Intelligence</title>
+<meta name="description" content="ML-based phishing, smishing and fraud intelligence platform"/>
+<meta name="theme-color" content="#0F6E56"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="ThreatLens"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0f1a;color:#e2e8f0;min-height:100vh}
+.header{background:#0d1421;border-bottom:1px solid #1e2d40;padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.logo{width:38px;height:38px;background:linear-gradient(135deg,#0F6E56,#1D9E75);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;letter-spacing:-1px}
+.brand{font-size:18px;font-weight:700;color:#e2e8f0}
+.brand span{color:#1D9E75}
+.subtitle{font-size:11px;color:#64748b;margin-top:1px}
+.badge{margin-left:auto;background:#0F6E5620;color:#1D9E75;border:1px solid #0F6E5640;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+.main{max-width:900px;margin:0 auto;padding:24px 16px}
+.install-bar{display:none;background:#0F6E5615;border:1px solid #0F6E5640;border-radius:10px;padding:12px 16px;margin-bottom:16px;align-items:center;gap:10px;font-size:13px;color:#1D9E75}
+.install-bar.show{display:flex}
+.btn-install{background:#0F6E56;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-left:auto;white-space:nowrap}
+.input-card{background:#0d1421;border:1px solid #1e2d40;border-radius:16px;padding:20px;margin-bottom:20px}
+.section-label{font-size:12px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-label::before{content:'';display:inline-block;width:7px;height:7px;background:#1D9E75;border-radius:50%}
+textarea{width:100%;background:#070c14;border:1px solid #1e2d40;border-radius:10px;padding:14px;color:#e2e8f0;font-size:14px;line-height:1.6;resize:vertical;min-height:120px;font-family:inherit;outline:none;transition:border .2s}
+textarea:focus{border-color:#0F6E56}
+textarea::placeholder{color:#2d3f55}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+input[type=text]{width:100%;background:#070c14;border:1px solid #1e2d40;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:14px;font-family:inherit;outline:none;transition:border .2s}
+input[type=text]:focus{border-color:#0F6E56}
+input[type=text]::placeholder{color:#2d3f55}
+.btn-analyze{width:100%;margin-top:14px;background:linear-gradient(135deg,#0F6E56,#1D9E75);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-analyze:hover{opacity:.9}
+.btn-analyze:disabled{opacity:.5;cursor:not-allowed}
+.status-bar{height:3px;background:#1e2d40;border-radius:3px;overflow:hidden;margin-bottom:20px;display:none}
+.status-bar.active{display:block}
+.loading-bar{height:100%;background:linear-gradient(90deg,#0F6E56,#1D9E75,#0F6E56);background-size:200%;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+.spinner{display:inline-block;width:15px;height:15px;border:2px solid #ffffff30;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.results{display:none}
+.results.visible{display:block}
+.threat-score-card{background:#0d1421;border:1px solid #1e2d40;border-radius:16px;padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:20px}
+.score-ring{position:relative;width:90px;height:90px;flex-shrink:0}
+.score-ring svg{transform:rotate(-90deg)}
+.score-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-val .num{font-size:24px;font-weight:700}
+.score-val .lbl{font-size:10px;color:#64748b;margin-top:1px;letter-spacing:1px}
+.score-info{flex:1}
+.score-info h3{font-size:18px;font-weight:700;margin-bottom:6px}
+.score-info p{font-size:13px;color:#94a3b8;line-height:1.6}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tag{font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid}
+.tag.danger{background:#7f1d1d25;color:#fca5a5;border-color:#7f1d1d50}
+.tag.warn{background:#78350f25;color:#fbbf24;border-color:#78350f50}
+.tag.info{background:#1e3a5f25;color:#7dd3fc;border-color:#1e3a5f50}
+.tag.safe{background:#14532d25;color:#86efac;border-color:#14532d50}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:#0d1421;border:1px solid #1e2d40;border-radius:16px;padding:18px;margin-bottom:16px}
+.card-title{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px}
+.kv-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid #1e2d4030;gap:12px}
+.kv-row:last-child{border-bottom:none}
+.kv-label{font-size:13px;color:#64748b;flex-shrink:0}
+.kv-val{font-size:13px;color:#e2e8f0;text-align:right;font-weight:500;word-break:break-all}
+.kv-val.red{color:#fca5a5}
+.kv-val.amber{color:#fbbf24}
+.kv-val.green{color:#86efac}
+.campaign-item{background:#070c14;border:1px solid #1e2d40;border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.campaign-item:last-child{margin-bottom:0}
+.campaign-item h4{font-size:14px;font-weight:600;color:#e2e8f0;margin-bottom:4px}
+.campaign-item p{font-size:13px;color:#94a3b8;line-height:1.5}
+.ioc-list{list-style:none;padding:0}
+.ioc-list li{font-size:13px;padding:8px 0;border-bottom:1px solid #1e2d4030;display:flex;gap:10px;align-items:flex-start}
+.ioc-list li:last-child{border-bottom:none}
+.ioc-type{font-size:10px;color:#64748b;text-transform:uppercase;font-weight:600;margin-bottom:2px}
+.ioc-val{color:#e2e8f0;font-weight:500;word-break:break-all}
+.evidence-body{background:#070c14;border-radius:10px;padding:16px;font-size:13px;color:#94a3b8;line-height:1.9;border:1px solid #1e2d40;white-space:pre-wrap;font-family:ui-monospace,monospace}
+.btn-export{background:transparent;border:1px solid #1e2d40;color:#94a3b8;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;margin-top:12px;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-export:hover{border-color:#0F6E56;color:#1D9E75}
+.impersonation-evidence{margin-top:10px;font-size:12px;color:#94a3b8;line-height:1.6;padding:10px;background:#070c14;border-radius:8px;border:1px solid #1e2d40}
+.empty-state{font-size:13px;color:#334155;padding:4px 0}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}.input-row{grid-template-columns:1fr}.threat-score-card{flex-direction:column;text-align:center;align-items:center}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">TL</div>
+  <div>
+    <div class="brand">Threat<span>Lens</span></div>
+    <div class="subtitle">Cyber Threat Intelligence Platform</div>
+  </div>
+  <div class="badge">ML Powered</div>
+</div>
+
+<div class="main">
+
+  <div class="install-bar" id="install-bar">
+    📲 Install ThreatLens on your device for offline access
+    <button class="btn-install" id="btn-install">Install App</button>
+  </div>
+
+  <div class="input-card">
+    <div class="section-label">Paste suspicious message or content</div>
+    <textarea id="msg-input" placeholder="Paste any suspicious SMS, WhatsApp, Facebook message, email, or threat content here..."></textarea>
+    <div class="input-row">
+      <input type="text" id="number-input" placeholder="Phone number (optional)"/>
+      <input type="text" id="url-input" placeholder="Suspicious URL (optional)"/>
+    </div>
+    <button class="btn-analyze" id="btn-analyze" onclick="analyze()">Analyze Threat</button>
+  </div>
+
+  <div class="status-bar" id="status-bar"><div class="loading-bar"></div></div>
+
+  <div class="results" id="results">
+
+    <div class="threat-score-card">
+      <div class="score-ring">
+        <svg width="90" height="90" viewBox="0 0 90 90">
+          <circle cx="45" cy="45" r="36" fill="none" stroke="#1e2d40" stroke-width="8"/>
+          <circle id="score-circle" cx="45" cy="45" r="36" fill="none" stroke="#fca5a5" stroke-width="8"
+            stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="226"
+            style="transition:stroke-dashoffset 1.2s ease,stroke .3s"/>
+        </svg>
+        <div class="score-val">
+          <span class="num" id="score-num" style="color:#fca5a5">0</span>
+          <span class="lbl">THREAT</span>
+        </div>
+      </div>
+      <div class="score-info">
+        <h3 id="threat-verdict">—</h3>
+        <p id="threat-summary"></p>
+        <div class="tags" id="threat-tags"></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title">Infrastructure Analysis</div>
+        <div id="infra-content"></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title">Impersonation Detection</div>
+        <div id="impersonation-content"></div>
+      </div>
+    </div>
+
+    <div style="height:16px"></div>
+
+    <div class="card">
+      <div class="card-title">Campaign Clustering</div>
+      <div id="campaign-content"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Indicators of Compromise (IOCs)</div>
+      <ul class="ioc-list" id="ioc-content"></ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Evidence Intelligence Report</div>
+      <div class="evidence-body" id="evidence-body"></div>
+      <button class="btn-export" onclick="exportReport()">⬇ Export Report (.txt)</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DEPLOYER: Replace the value below with your key
+// Get it free at: aistudio.google.com/apikey
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+var API_KEY = 'AQ.Ab8RN6JH0n_231MseRvsfjQSCOb0-bTO9yNbWK6hWnSjHPAAAw';
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+let deferredPrompt, lastReport = '';
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('install-bar').classList.add('show');
+});
+document.getElementById('btn-install').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const {outcome} = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') document.getElementById('install-bar').classList.remove('show');
+  deferredPrompt = null;
+});
+
+function setScore(score) {
+  const circle = document.getElementById('score-circle');
+  const num = document.getElementById('score-num');
+  circle.style.strokeDashoffset = 226 - (score / 100) * 226;
+  const color = score > 70 ? '#fca5a5' : score > 40 ? '#fbbf24' : '#86efac';
+  circle.style.stroke = num.style.color = color;
+  let c = 0; const iv = setInterval(() => { num.textContent = Math.min(c += 2, score); if (c >= score) clearInterval(iv); }, 18);
+}
+function kv(label, value, cls = '') { return `<div class="kv-row"><span class="kv-label">${label}</span><span class="kv-val ${cls}">${value}</span></div>`; }
+function rCls(v = '') { v = v.toLowerCase(); return v.includes('high') || v.includes('blacklist') || v.includes('suspicious') ? 'red' : v.includes('medium') || v.includes('moderate') ? 'amber' : v.includes('low') || v.includes('clean') ? 'green' : ''; }
+function tCls(t = '') { t = t.toLowerCase(); return t.includes('phish') || t.includes('smish') || t.includes('malware') || t.includes('fraud') || t.includes('critical') ? 'danger' : t.includes('suspicious') || t.includes('spoof') || t.includes('social') || t.includes('warn') ? 'warn' : t.includes('clean') || t.includes('safe') || t.includes('low') ? 'safe' : 'info'; }
+function parseJSON(text) {
+  try { return JSON.parse(text.replace(/```json|```/g, '').trim()); } catch {}
+  try { const m = text.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0]); } catch {}
+  return null;
+}
+
+async function analyze() {
+  const msg    = document.getElementById('msg-input').value.trim();
+  const number = document.getElementById('number-input').value.trim();
+  const url    = document.getElementById('url-input').value.trim();
+  if (!msg && !number && !url) { alert('Please paste a message, number, or URL to analyse.'); return; }
+
+  const btn = document.getElementById('btn-analyze');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Analysing threat...';
+  document.getElementById('status-bar').classList.add('active');
+  document.getElementById('results').classList.remove('visible');
+
+  const prompt = `You are an expert cybersecurity threat intelligence analyst specialising in fraud, phishing, and smishing detection. Analyse the following content and return ONLY valid JSON — no markdown, no text outside the JSON.
+
+Message: ${msg || 'none'}
+Phone Number: ${number || 'none'}
+URL: ${url || 'none'}
+
+Return exactly this JSON:
+{
+  "threat_score": <integer 0-100>,
+  "verdict": "<Critical Threat|High Risk|Moderate Risk|Low Risk|Clean>",
+  "summary": "<2-3 sentence executive summary>",
+  "tags": ["tag1","tag2"],
+  "infrastructure": {
+    "phone_origin": "<country/carrier or Unknown>",
+    "number_type": "<VoIP/Mobile/Landline/Unknown>",
+    "url_domain": "<extracted domain or None>",
+    "hosting_risk": "<High/Medium/Low/Unknown>",
+    "registrar_flag": "<Suspicious/Clean/Unknown>",
+    "ip_reputation": "<Blacklisted/Suspicious/Clean/Unknown>"
+  },
+  "impersonation": {
+    "detected": <true|false>,
+    "target_brand": "<brand or None>",
+    "technique": "<Brand Spoofing/Typosquatting/Lookalike Domain/Social Engineering/None>",
+    "confidence": "<High/Medium/Low>",
+    "evidence": "<specific evidence>"
+  },
+  "campaigns": [{"name":"<name>","description":"<description>","prevalence":"<High/Medium/Low>"}],
+  "iocs": [{"type":"<Phone/URL/Domain/Keyword/Pattern>","value":"<value>","risk":"<High/Medium/Low>"}],
+  "evidence_report": "<formal 200-word intelligence report with case reference, indicators, attribution, and recommended actions>"
+}`;
+
+  try {
+    const isBearer = API_KEY.startsWith('AQ.') || API_KEY.startsWith('ya29.');
+    const url = isBearer
+      ? 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+      : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+    const headers = { 'Content-Type': 'application/json' };
+    if (isBearer) headers['Authorization'] = `Bearer ${API_KEY}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 1500 } })
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || res.statusText); }
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const result = parseJSON(raw);
+    if (!result) throw new Error('Could not parse response — please try again.');
+    renderResults(result);
+  } catch (err) {
+    alert('Analysis failed: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.innerHTML = 'Analyze Threat';
+    document.getElementById('status-bar').classList.remove('active');
+  }
+}
+
+function renderResults(r) {
+  document.getElementById('results').classList.add('visible');
+  setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+  setScore(r.threat_score || 0);
+  const v = document.getElementById('threat-verdict');
+  v.textContent = r.verdict || 'Unknown';
+  v.style.color = r.threat_score > 70 ? '#fca5a5' : r.threat_score > 40 ? '#fbbf24' : '#86efac';
+  document.getElementById('threat-summary').textContent = r.summary || '';
+  document.getElementById('threat-tags').innerHTML = (r.tags || []).map(t => `<span class="tag ${tCls(t)}">${t}</span>`).join('');
+
+  const i = r.infrastructure || {};
+  document.getElementById('infra-content').innerHTML =
+    kv('Phone origin', i.phone_origin || 'Unknown') +
+    kv('Number type',  i.number_type  || 'Unknown') +
+    kv('Domain',       i.url_domain   || 'None') +
+    kv('Hosting risk', i.hosting_risk || 'Unknown', rCls(i.hosting_risk)) +
+    kv('Registrar',    i.registrar_flag || 'Unknown', rCls(i.registrar_flag)) +
+    kv('IP reputation',i.ip_reputation || 'Unknown', rCls(i.ip_reputation));
+
+  const imp = r.impersonation || {};
+  document.getElementById('impersonation-content').innerHTML =
+    kv('Detected',     imp.detected ? '<span style="color:#fca5a5;font-weight:700">YES</span>' : '<span style="color:#86efac">No</span>') +
+    kv('Target brand', imp.target_brand || 'None') +
+    kv('Technique',    imp.technique   || 'None') +
+    kv('Confidence',   imp.confidence  || 'Unknown', rCls(imp.confidence)) +
+    `<div class="impersonation-evidence">${imp.evidence || 'No impersonation evidence detected.'}</div>`;
+
+  document.getElementById('campaign-content').innerHTML = (r.campaigns || []).length
+    ? (r.campaigns || []).map(c => `<div class="campaign-item">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <h4>${c.name || 'Unknown'}</h4>
+          <span style="font-size:11px;font-weight:700;color:${c.prevalence === 'High' ? '#fca5a5' : c.prevalence === 'Medium' ? '#fbbf24' : '#86efac'}">${c.prevalence || ''}</span>
+        </div><p>${c.description || ''}</p></div>`).join('')
+    : '<p class="empty-state">No known campaign patterns matched.</p>';
+
+  document.getElementById('ioc-content').innerHTML = (r.iocs || []).length
+    ? (r.iocs || []).map(x => `<li>
+        <div style="flex:1"><div class="ioc-type">${x.type || ''}</div><div class="ioc-val">${x.value || ''}</div></div>
+        <span style="font-size:11px;font-weight:700;color:${x.risk === 'High' ? '#fca5a5' : x.risk === 'Medium' ? '#fbbf24' : '#86efac'};flex-shrink:0">${x.risk || ''}</span>
+      </li>`).join('')
+    : '<li><span class="empty-state">No IOCs extracted.</span></li>';
+
+  lastReport = r.evidence_report || '';
+  document.getElementById('evidence-body').textContent = lastReport || 'No report generated.';
+}
+
+function exportReport() {
+  if (!lastReport) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lastReport], { type: 'text/plain' }));
+  a.download = 'ThreatLens_Report_' + new Date().toISOString().slice(0, 10) + '.txt';
+  a.click();
+}
+
+if ('serviceWorker' in navigator) {
+  const sw = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>clients.claim());self.addEventListener('fetch',e=>{if(e.request.url.includes('googleapis.com'))return;e.respondWith(fetch(e.request).catch(()=>caches.match('/')));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], { type: 'application/javascript' }))).catch(() => {});
+}
+</script>
+</body>
+</html>
